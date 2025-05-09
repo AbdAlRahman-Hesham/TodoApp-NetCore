@@ -263,7 +263,7 @@ Authorization: Bearer your_jwt_token_here
 ## Testing with Postman
 
 1. Import the provided Postman collection.
-2. Set the `base_url` variable to your development URL (default: `https://localhost:7158`).
+2. Set the `base_url` variable to your development URL (default: `https://localhost:7184`).
 3. Start with the **Register** or **Login** request to retrieve a token.
 4. The token will be saved to `auth_token` for use in future requests.
 
