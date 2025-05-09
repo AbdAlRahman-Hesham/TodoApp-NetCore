@@ -27,7 +27,7 @@ Here’s a clean and professional version of your API documentation formatted as
 
 ### Prerequisites
 
-* [.NET 7 SDK or later](https://dotnet.microsoft.com/en-us/download)
+* [.NET 8 SDK or later](https://dotnet.microsoft.com/en-us/download)
 * SQL Server (or compatible database)
 * [Postman](https://www.postman.com/) (for API testing)
 
