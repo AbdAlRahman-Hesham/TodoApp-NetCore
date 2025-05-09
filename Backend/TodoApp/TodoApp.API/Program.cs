@@ -1,4 +1,6 @@
+using TodoApp.Api.Middleware.MiddlewareExtentions;
 using TodoApp.Api.ServiceExtensions;
+using TodoApp.API.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,17 +17,22 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+app.UseHttpsRedirection();
+app.UseHttpsRedirection();
+app.UseStatusCodePagesWithReExecute("/errors/{0}");
+app.UseMiddleware<ExceptionMiddleware>();
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+await app.UseUpdateDataBase();
 
-app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();
