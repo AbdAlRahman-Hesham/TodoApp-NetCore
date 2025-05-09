@@ -1,7 +1,8 @@
-﻿using System.Linq.Expressions;
+﻿using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 using TodoApp.Application.Specifications;
 
-public class BaseSpecification<T> : ISpecification<T>
+public class BaseSpecification<T> : ISpecification<T> where T : class 
 {
     public Expression<Func<T, bool>>? Criteria { get; set; }
     public List<Expression<Func<T, object>>> Includes { get; } = new();
@@ -43,6 +44,23 @@ public class BaseSpecification<T> : ISpecification<T>
     }
     public virtual IQueryable<T> Apply(IQueryable<T> query)
     {
+        if (Criteria != null)
+            query = query.Where(Criteria);
+
+        // Apply includes - modified to use EF Core's Include
+        query = Includes.Aggregate(query,
+            (current, include) => current.Include(include));
+
+        // Ordering
+        if (OrderBy != null)
+            query = query.OrderBy(OrderBy);
+        else if (OrderByDescending != null)
+            query = query.OrderByDescending(OrderByDescending);
+
+        // Paging
+        if (IsPagingEnabled)
+            query = query.Skip(Skip).Take(Take);
+
         return query;
     }
 }

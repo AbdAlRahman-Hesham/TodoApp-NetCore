@@ -22,6 +22,22 @@ public class AccountController(
     [ProducesResponseType(typeof(ApiError), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<AuthResponse>> Register(RegisterDto model)
     {
+        if (await _userManager.FindByNameAsync(model.UserName) != null)
+        {
+            return BadRequest(new ApiError(400, "Username already exists", new Dictionary<string, string[]>
+        {
+            { "UserName", new[] { "This username is already taken." } }
+        }));
+        }
+
+        if (await _userManager.FindByEmailAsync(model.Email) != null)
+        {
+            return BadRequest(new ApiError(400, "Email already exists", new Dictionary<string, string[]>
+        {
+            { "Email", new[] { "This email is already in use." } }
+        }));
+        }
+
         var user = new ApplicationUser { UserName = model.UserName, Email = model.Email };
 
         var result = await _userManager.CreateAsync(user, model.Password);

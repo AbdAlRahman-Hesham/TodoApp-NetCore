@@ -34,12 +34,7 @@ public class Repository<T> : IRepository<T> where T : class
 
     protected IQueryable<T> ApplySpecification(ISpecification<T> spec)
     {
-        var query = _context.Set<T>().AsQueryable();
-        if (spec != null)
-        {
-            query = spec.Apply(query);  // Apply the specification logic
-        }
-        return query;
+        return spec == null ? _context.Set<T>() : spec.Apply(_context.Set<T>());
     }
 
     public async Task<T?> GetByIdAsync(Guid id)

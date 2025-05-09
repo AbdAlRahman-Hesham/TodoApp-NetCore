@@ -33,7 +33,7 @@ if (app.Environment.IsDevelopment())
 }
 app.UseCors(op =>
 {
-    op.WithOrigins(builder.Configuration.GetSection("AllowedOrigins").Get<string[]>()!)
+    op.WithOrigins("http://127.0.0.1:5500")
     .AllowAnyMethod()
     .AllowAnyHeader()
     .AllowCredentials();
