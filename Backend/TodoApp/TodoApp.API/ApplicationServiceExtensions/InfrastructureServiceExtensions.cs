@@ -1,7 +1,10 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using TodoApp.Application.Interfaces.Persistence;
 using TodoApp.Domain.IdentityEntities;
+using TodoApp.Infrastructure.Identity;
 using TodoApp.Infrastructure.Persistence.Data;
+using TodoApp.Infrastructure.Persistence.Repositories;
 
 namespace TodoApp.Api.ServiceExtensions;
 
@@ -16,7 +19,11 @@ public static class InfrastructureServiceExtensions
             .AddEntityFrameworkStores<AppDbContext>()
             .AddDefaultTokenProviders();
 
-      
+        services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+        services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
+        services.AddCors();
+
+
         return services;
     }
 }
