@@ -1,8 +1,36 @@
-Here’s a clean and professional version of your API documentation formatted as a `README.md` file for your Todo API project:
+# Todo API
+---
 
 ---
 
-# Todo API
+# Front-End Environment Setup
+
+To set up the front-end environment, follow these steps:
+
+1. **Locate the `script.js` file**
+   This file contains the base URL for API communication.
+
+2. **Update the API base URL**
+   Open the `script.js` file and find the following line:
+
+   ```javascript
+   const API_BASE_URL = "https://localhost:7184/api";
+   ```
+
+3. **Change the port if needed**
+   Replace `7184` with the correct port number for your local backend server.
+
+   For example, if your API runs on port `5001`, update the line to:
+
+   ```javascript
+   const API_BASE_URL = "https://localhost:5001/api";
+   ```
+
+4. **Save the file and restart your front-end application if necessary.**
+
+---
+
+
 
 ## Table of Contents
 
