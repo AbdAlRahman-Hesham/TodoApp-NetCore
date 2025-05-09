@@ -2,7 +2,9 @@
 using Microsoft.EntityFrameworkCore.Storage;
 using TodoApp.Application.Interfaces.Persistence;
 using TodoApp.Application.Specifications;
+using TodoApp.Domain.Entities;
 using TodoApp.Infrastructure.Persistence.Data;
+using TodoApp.Infrastructure.Services;
 
 
 namespace TodoApp.Infrastructure.Persistence.Repositories;
@@ -10,10 +12,12 @@ namespace TodoApp.Infrastructure.Persistence.Repositories;
 public class Repository<T> : IRepository<T> where T : class
 {
     private protected readonly AppDbContext _context;
+    private readonly IDomainEventService _domainEventService;
 
-    public Repository(AppDbContext context)
+    public Repository(AppDbContext context, IDomainEventService domainEventService)
     {
         _context = context;
+        _domainEventService = domainEventService;
     }
 
     public virtual async Task<T?> GetEntityWithSpecAsync(ISpecification<T> spec)
@@ -55,11 +59,30 @@ public class Repository<T> : IRepository<T> where T : class
 
     public async Task<int> SaveChangesAsync()
     {
+        // Dispatch Domain Events before saving
+        await DispatchDomainEventsAsync();
 
         return await _context.SaveChangesAsync();
     }
 
-   
+    private async Task DispatchDomainEventsAsync()
+    {
+        var domainEventEntities = _context.ChangeTracker
+            .Entries<Todo>()
+            .Where(e => e.Entity.DomainEvents.Any())
+            .Select(e => e.Entity)
+            .ToList();
+
+        // Get all domain events
+        var domainEvents = domainEventEntities
+            .SelectMany(e => e.DomainEvents)
+            .ToList();
+
+        domainEventEntities.ForEach(e => e.ClearDomainEvents());
+
+        await _domainEventService.PublishAsync(domainEvents);
+    }
+
     public async Task<int> CountAsync(ISpecification<T> spec)
     {
         var query = ApplySpecification(spec);
@@ -67,7 +90,7 @@ public class Repository<T> : IRepository<T> where T : class
     }
     public async Task<IDbContextTransaction> BeginTransactionAsync()
     {
-       return await _context.Database.BeginTransactionAsync();
+        return await _context.Database.BeginTransactionAsync();
     }
 
     public async Task CommitTransactionAsync()

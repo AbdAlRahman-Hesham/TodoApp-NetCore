@@ -1,20 +1,23 @@
 using TodoApp.Api.Middleware.MiddlewareExtentions;
 using TodoApp.Api.ServiceExtensions;
 using TodoApp.API.Middleware;
+using TodoApp.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Configure services via extension methods
+builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddJwtAuthentication(builder.Configuration);
-
-
-
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
+// Register Swagger services
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Add email configuration
+builder.Services.Configure<EmailSettings>(
+    builder.Configuration.GetSection(EmailSettings.SectionName));
 var app = builder.Build();
 
 app.UseHttpsRedirection();
@@ -28,6 +31,13 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+app.UseCors(op =>
+{
+    op.WithOrigins(builder.Configuration.GetSection("AllowedOrigins").Get<string[]>()!)
+    .AllowAnyMethod()
+    .AllowAnyHeader()
+    .AllowCredentials();
+});
 await app.UseUpdateDataBase();
 
 

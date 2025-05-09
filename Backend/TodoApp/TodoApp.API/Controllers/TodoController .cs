@@ -47,7 +47,6 @@ public class TodoController : ApiBaseController
     {
         var user = await _userManager.GetUserAsync(User);
 
-        // Using TodoSpecification for single item lookup
         var parameters = new TodoParameters();
         var spec = new TodoSpecification(parameters, user!.Id)
         {
@@ -89,7 +88,6 @@ public class TodoController : ApiBaseController
     {
         var user = await _userManager.GetUserAsync(User);
 
-        // Using TodoSpecification for single item lookup
         var parameters = new TodoParameters();
         var spec = new TodoSpecification(parameters, user!.Id)
         {
@@ -119,7 +117,6 @@ public class TodoController : ApiBaseController
     {
         var user = await _userManager.GetUserAsync(User);
 
-        // Using TodoSpecification for single item lookup
         var parameters = new TodoParameters();
         var spec = new TodoSpecification(parameters, user!.Id)
         {
@@ -144,38 +141,32 @@ public class TodoController : ApiBaseController
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<ActionResult<TodoDto>> MarkAsComplete(Guid id)
     {
-        // Get current user
         var user = await _userManager.GetUserAsync(User);
         if (user == null)
         {
             return Unauthorized(new ApiError(401, "User not authenticated"));
         }
 
-        // Create specification for the todo item
         var spec = new TodoSpecification(new TodoParameters(), user.Id)
         {
             Criteria = t => t.Id == id
         };
 
-        // Begin transaction
         await using var transaction = await _todoRepo.BeginTransactionAsync();
         try
         {
-            // Retrieve the todo item
             var todo = await _todoRepo.GetEntityWithSpecAsync(spec);
             if (todo == null)
             {
                 return NotFound(new ApiError(404, "Todo not found"));
             }
 
+            todo.MarkAsComplete();
 
-            // Save changes (this dispatches domain events automatically)
             await _todoRepo.SaveChangesAsync();
 
-            // Commit transaction
             await transaction.CommitAsync();
 
-            // Return the updated todo
             return Ok(todo.Adapt<TodoDto>());
         }
         catch (Exception ex)
